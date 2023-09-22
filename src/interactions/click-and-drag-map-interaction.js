@@ -1,6 +1,6 @@
 import { MapInteraction } from '../map-interaction.js';
 
-/** @typedef {import('../geojson-map.js').ViewBox} ViewBox */
+/** @typedef {import('../geojsonmap.js').ViewBox} ViewBox */
 
 export class ClickAndDragMapInteraction extends MapInteraction {
   /**

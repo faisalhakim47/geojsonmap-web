@@ -44,7 +44,8 @@ async function main() {
  * @returns {Promise<import('geojson').FeatureCollection<import('geojson').MultiPolygon, GeoJsonProps>>}
  */
 async function fetchGeoJSON() {
-  const response = await fetch('https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-province-simple.json');
+  // const response = await fetch('https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-province-simple.json');
+  const response = await fetch('https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-province.json');
   const geoJson = await response.json();
   return geoJson;
 }

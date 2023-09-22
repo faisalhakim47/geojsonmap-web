@@ -2,7 +2,7 @@
 
 import { MapPlugin } from './map-plugin.js';
 
-/** @typedef {import('./geojson-map').ViewBox} ViewBox */
+/** @typedef {import('./geojsonmap.js').ViewBox} ViewBox */
 
 /**
  * @interface

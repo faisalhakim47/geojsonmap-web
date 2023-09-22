@@ -1,6 +1,6 @@
 // @ts-check
 
-/** @typedef {import('./geojson-map').ViewBox} ViewBox */
+/** @typedef {import('./geojsonmap.js').ViewBox} ViewBox */
 
 /**
  * @interface

@@ -1,6 +1,6 @@
 // @ts-check
 
-export { GeoJsonMap } from './geojson-map.js';
+export { GeoJsonMap } from './geojsonmap.js';
 export { MapFeature } from './map-feature.js';
 export { MapInteraction } from './map-interaction.js';
 export { MapPlugin } from './map-plugin.js';
