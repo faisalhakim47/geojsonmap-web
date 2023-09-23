@@ -1,4 +1,7 @@
+// @ts-check
+
 import { MapInteraction } from '../map-interaction.js';
+import { assertType } from '../tools/typing.js';
 
 /** @typedef {import('../geojsonmap.js').ViewBox} ViewBox */
 
@@ -12,12 +15,15 @@ export class ScrollZoomMapInteraction extends MapInteraction {
     event.preventDefault();
 
     if (event instanceof WheelEvent) {
+      const svg = this._svg;
+      assertType(svg, SVGSVGElement);
+
       const scrollYDelta = event.deltaY;
       const mouseX = event.offsetX;
       const mouseY = event.offsetY;
 
-      const svgWidth = this._svg.clientWidth;
-      const svgHeight = this._svg.clientHeight;
+      const svgWidth = svg.clientWidth;
+      const svgHeight = svg.clientHeight;
 
       const mouseXRatio = mouseX / svgWidth;
       const mouseYRatio = mouseY / svgHeight;

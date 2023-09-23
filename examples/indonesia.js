@@ -9,14 +9,15 @@ main();
 async function main() {
   const geoJson = await fetchGeoJSON();
 
-  const map = new GeoJsonMap(geoJson, {
+  const map = new GeoJsonMap({
     initialWidth: 'inherit',
     initialHeight: 'inherit',
     initialFill: '#ffffff',
   });
 
-  map.use(ClickAndDragMapInteraction);
-  map.use(ScrollZoomMapInteraction);
+  map.add(geoJson);
+  map.use(new ClickAndDragMapInteraction());
+  map.use(new ScrollZoomMapInteraction());
 
   map.on('feature:mouseenter', function (feature) {
     map.forEach(function (feature) {

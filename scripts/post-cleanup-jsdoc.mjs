@@ -17,6 +17,7 @@ async function main() {
       return !(
         (index > 0 && line.includes('@ts-check'))
         || (line.includes('import') && line.includes('ViewBox'))
+        || (line.includes('import') && line.includes('GeoJsonMap'))
       );
     });
 

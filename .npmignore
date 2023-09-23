@@ -1,0 +1,4 @@
+/.github
+/playwright.config.cjs
+/scripts
+/tests

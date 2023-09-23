@@ -8,6 +8,7 @@ import { MapPlugin } from './map-plugin.js';
 /** @typedef {import('geojson').Geometry} Geometry */
 /** @typedef {import('geojson').MultiPolygon} MultiPolygon */
 /** @typedef {import('geojson').Polygon} Polygon */
+/** @typedef {import('geojson').Position} Position */
 
 /**
  * @template Geom
@@ -253,7 +254,7 @@ export class GeoJsonMap extends EventEmitter {
   }
 
   /**
-   * @param {import('geojson').MultiPolygon} multiPolygon
+   * @param {MultiPolygon} multiPolygon
    * @returns {string}
    */
   #multiPolygonToSVGPath(multiPolygon) {
@@ -267,7 +268,7 @@ export class GeoJsonMap extends EventEmitter {
   }
 
   /**
-   * @param {import('geojson').Polygon} polygon
+   * @param {Polygon} polygon
    * @returns {string}
    */
   #polygonToSVGPath(polygon) {
@@ -279,7 +280,7 @@ export class GeoJsonMap extends EventEmitter {
   }
 
   /**
-   * @param {import('geojson').Position[]} ring
+   * @param {Position[]} ring
    * @returns {string}
    */
   #ringToSVGPath(ring) {
@@ -294,7 +295,7 @@ export class GeoJsonMap extends EventEmitter {
   }
 
   /**
-   * @param {import('geojson').FeatureCollection<Polygon|MultiPolygon, GeoJSONFeatureProps>} geoJson
+   * @param {FeatureCollection<Polygon|MultiPolygon, GeoJSONFeatureProps>} geoJson
    */
   #getBoundingRectFromGeoJSON(geoJson) {
     const rect = {
@@ -328,7 +329,7 @@ export class GeoJsonMap extends EventEmitter {
   }
 
   /**
-   * @param {import('geojson').MultiPolygon} multiPolygon
+   * @param {MultiPolygon} multiPolygon
    */
   #getBoundingRectFromMultiPolygon(multiPolygon) {
     const rect = {
@@ -352,7 +353,7 @@ export class GeoJsonMap extends EventEmitter {
   }
 
   /**
-   * @param {import('geojson').Polygon} polygon
+   * @param {Polygon} polygon
    */
   #getBoundingRectFromPolygon(polygon) {
     const rect = {
@@ -374,7 +375,7 @@ export class GeoJsonMap extends EventEmitter {
   }
 
   /**
-   * @param {import('geojson').Position[]} ring
+   * @param {Array<Position>} ring
    */
   #getBoundingRectFromRing(ring) {
     const rect = {

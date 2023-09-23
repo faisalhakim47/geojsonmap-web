@@ -1,5 +1,5 @@
 {
-  "name": "geojsonmap-web",
+  "name": "geojsonmap",
   "version": "1.0.0",
   "description": "GeoJSON Map Viewer on Web Browser",
   "author": {
@@ -9,6 +9,7 @@
   "license": "MIT",
   "type": "module",
   "module": "dist/geojsonmap.js",
+  "types": "dist/geojsonmap.d.ts",
   "scripts": {
     "start": "npx http-server -c-1 -p 8080"
   },
@@ -16,7 +17,11 @@
     "@types/geojson": "^7946.0.11"
   },
   "devDependencies": {
+    "@babel/cli": "^7.22.15",
+    "@babel/preset-env": "^7.22.20",
     "@playwright/test": "^1.38.1",
-    "@types/node": "^20.6.3"
-  }
+    "@types/node": "^20.6.3",
+    "rollup": "^3.29.2"
+  },
+  "browserslist": "> 0.25%, not dead"
 }

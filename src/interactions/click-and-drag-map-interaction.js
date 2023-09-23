@@ -1,4 +1,7 @@
+// @ts-check
+
 import { MapInteraction } from '../map-interaction.js';
+import { assertType } from '../tools/typing.js';
 
 /** @typedef {import('../geojsonmap.js').ViewBox} ViewBox */
 
@@ -12,6 +15,9 @@ export class ClickAndDragMapInteraction extends MapInteraction {
     event.preventDefault();
 
     if (event instanceof MouseEvent) {
+      const svg = this._svg;
+      assertType(svg, SVGSVGElement);
+
       const isHoldClick = event.buttons === 1;
 
       if (!isHoldClick) {
@@ -21,8 +27,8 @@ export class ClickAndDragMapInteraction extends MapInteraction {
       const movementX = -event.movementX;
       const movementY = -event.movementY;
 
-      const svgWidth = this._svg.clientWidth;
-      const svgHeight = this._svg.clientHeight;
+      const svgWidth = svg.clientWidth;
+      const svgHeight = svg.clientHeight;
 
       const movementXRatio = movementX / svgWidth;
       const movementYRatio = movementY / svgHeight;
