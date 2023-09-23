@@ -1,30 +1,24 @@
 // @ts-check
 
+/** @typedef {import('./geojsonmap.js').GeoJsonMap} GeoJsonMap */
 /** @typedef {import('./geojsonmap.js').ViewBox} ViewBox */
 
 /**
  * @interface
- * @template MapPluginOptions
  */
 export class MapPlugin {
   /**
-   * @protected
-   * @type {SVGSVGElement}
-   */
-  _svg;
-  
-  /**
+   * @abstract
    * @param {SVGSVGElement} svg
    */
-  constructor(svg) {
-    this._svg = svg;
+  install(svg) {
+    throw new Error('must be implemented by subclass!');
   }
 
   /**
    * @abstract
-   * @param {MapPluginOptions} [options]
    */
-  initialize(options) {
+  uninstall() {
     throw new Error('must be implemented by subclass!');
   }
 }

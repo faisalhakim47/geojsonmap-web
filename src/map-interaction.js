@@ -6,9 +6,15 @@ import { MapPlugin } from './map-plugin.js';
 
 /**
  * @interface
- * @implements {MapPlugin<MapInteractionOptions>}
+ * @implements {MapPlugin}
  */
 export class MapInteraction extends MapPlugin {
+  /**
+   * @protected
+   * @type {SVGSVGElement|undefined}
+   */
+  _svg;
+
   /**
    * @abstract
    * @param {Event} event
@@ -21,10 +27,14 @@ export class MapInteraction extends MapPlugin {
 
   /**
    * @abstract
-   * @param {MapInteractionOptions} options
+   * @param {SVGSVGElement} svg
    */
-  initialize(options) {
-    // nothing to do here
+  install(svg) {
+    this._svg = svg;
+  }
+
+  uninstall() {
+    this._svg = undefined;
   }
 }
 

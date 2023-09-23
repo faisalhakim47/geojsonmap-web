@@ -3,3 +3,6 @@ node_modules
 
 # App Build
 dist
+/test-results/
+/playwright-report/
+/playwright/.cache/
