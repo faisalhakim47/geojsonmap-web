@@ -17,7 +17,17 @@
   </style>
 </head>
 <body>
-  <div id="map"></div>
-  <script type="module" src="./click-and-drag-interaction.js"></script>
+  <script>
+    (async function () {
+      const isProduction = location.port === '';
+      const script = document.createElement('script');
+      script.type = 'importmap';
+      script.textContent = isProduction
+        ? '{ "imports": { "geojsonmap": "https://ga.jspm.io/npm:geojsonmap@latest" } }'
+        : '{ "imports": { "geojsonmap": "/src/index.js" } }';
+      document.head.appendChild(script);
+      await import('./click-and-drag-interaction.js');
+    })();
+  </script>
 </body>
 </html>

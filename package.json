@@ -11,7 +11,8 @@
   "module": "dist/geojsonmap.js",
   "types": "dist/geojsonmap.d.ts",
   "scripts": {
-    "start": "npx http-server -c-1 -p 8080"
+    "start": "npx http-server -c-1 -p 8080",
+    "build": "sh scripts/bundle.sh"
   },
   "dependencies": {
     "@types/geojson": "^7946.0.11"
@@ -20,7 +21,9 @@
     "@babel/cli": "^7.22.15",
     "@babel/preset-env": "^7.22.20",
     "@playwright/test": "^1.38.1",
-    "@types/node": "^20.6.3",
+    "@types/node": "^20.6.4",
+    "eslint": "^8.50.0",
+    "eslint-plugin-import": "^2.28.1",
     "rollup": "^3.29.2"
   },
   "browserslist": "> 0.25%, not dead"

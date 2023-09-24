@@ -1,8 +1,8 @@
 // @ts-check
 
-import { GeoJsonMap } from '../src/index.js';
-import { ClickAndDragMapInteraction } from '../src/interactions/click-and-drag-map-interaction.js';
-import { ScrollZoomMapInteraction } from '../src/interactions/scroll-zoom-map-interaction.js';
+/// <reference path="../dist/geojsonmap.d.ts" />
+
+import { GeoJsonMap, ClickAndDragMapInteraction } from 'geojsonmap';
 
 main();
 
@@ -17,7 +17,6 @@ async function main() {
 
   map.add(geoJson);
   map.use(new ClickAndDragMapInteraction());
-  map.use(new ScrollZoomMapInteraction());
 
   map.on('feature:mouseenter', function (feature) {
     map.forEach(function (feature) {
@@ -32,13 +31,9 @@ async function main() {
     });
   });
 
-  const div = document.getElementById('map');
-
-  if (!(div instanceof HTMLDivElement)) {
-    throw new Error('div#map not found!');
-  }
-
-  map.attachTo(div);
+  const div = document.createElement('div');
+  div.appendChild(map.getMapElement());
+  document.body.appendChild(div);
 }
 
 /**

@@ -4,6 +4,7 @@ import { EventEmitter } from './event-emitter.js';
 import { MapFeature } from './map-feature.js';
 import { MapInteraction } from './map-interaction.js';
 import { MapPlugin } from './map-plugin.js';
+import { throttle } from './throttle.js';
 
 /** @typedef {import('geojson').Geometry} Geometry */
 /** @typedef {import('geojson').MultiPolygon} MultiPolygon */
@@ -25,8 +26,8 @@ import { MapPlugin } from './map-plugin.js';
  * @template GeoJSONFeatureProps
  */
 export class GeoJsonMap extends EventEmitter {
-  /** @type {Element|undefined} */
-  #attachedElement;
+  /** @type {HTMLDivElement|undefined} */
+  #containerElement;
 
   /** @type {SVGSVGElement|undefined} */
   #svg;
@@ -114,54 +115,83 @@ export class GeoJsonMap extends EventEmitter {
   }
 
   /**
-   * @param {Element} element
+   * @returns {HTMLDivElement}
    */
-  attachTo(element) {
-    if (!(element instanceof Element)) {
-      throw new Error('node must be an instance of Node!');
+  getMapElement() {
+    if (this.#containerElement instanceof HTMLDivElement) {
+      return this.#containerElement;
     }
 
-    const svg = this.#geoJsonToSVGElement(this.#geojson);
+    const { containerDiv } = this.#createMapElement();
 
-    for (const plugin of this.#plugins) {
-      plugin.install(svg);
-    }
+    this.#containerElement = containerDiv;
 
-    const initialHeight = this.#initialHeight === 'inherit'
-      ? element.clientHeight
-      : this.#initialHeight;
-    const initialWidth = this.#initialWidth === 'inherit'
-      ? element.clientWidth
-      : this.#initialWidth;
-
-    if (typeof initialHeight === 'number') {
-      svg.setAttribute('height', initialHeight.toString());
-    }
-    if (typeof initialWidth === 'number') {
-      svg.setAttribute('width', initialWidth.toString());
-    }
-
-    element.appendChild(svg);
-    this.#attachedElement = element;
+    return containerDiv;
   }
 
   destroy() {
-    if (!(this.#attachedElement instanceof Element)) {
+    if (!(this.#containerElement instanceof Element)) {
       throw new Error('map is not attached to any element!');
-    }
-
-    if (!(this.#svg instanceof SVGSVGElement)) {
-      throw new Error('svg is not initialized!');
     }
 
     for (const plugin of this.#plugins) {
       plugin.uninstall();
     }
 
-    this.#attachedElement.removeChild(this.#svg);
+    this.#containerElement = undefined;
+  }
 
-    this.#svg = undefined;
-    this.#attachedElement = undefined;
+  #createMapElement() {
+    const containerDiv = document.createElement('div');
+
+    const { svg, viewBoxAnimate } = this.#geoJsonToSVGElement(this.#geojson);
+
+    /**
+     * @param {Event} event
+     */
+    const viewBoxHandler = (event) => {
+      const viewBoxVal = svg.viewBox.baseVal;
+      /** @type {ViewBox} */
+      const initialViewBox = {
+        x: viewBoxVal.x,
+        y: viewBoxVal.y,
+        width: viewBoxVal.width,
+        height: viewBoxVal.height,
+      };
+      const mappedViewBox = this.#interactions
+        .reduce(function (viewBox, interaction) {
+          return interaction.viewBoxMapper(event, viewBox);
+        }, initialViewBox);
+      console.log(mappedViewBox);
+      if (
+        mappedViewBox.x !== initialViewBox.x
+        || mappedViewBox.y !== initialViewBox.y
+        || mappedViewBox.width !== initialViewBox.width
+        || mappedViewBox.height !== initialViewBox.height
+      ) {
+        requestAnimationFrame(function () {
+          viewBoxAnimate.setAttribute('to', `${mappedViewBox.x} ${mappedViewBox.y} ${mappedViewBox.width} ${mappedViewBox.height}`);
+        });
+      }
+    };
+
+    const throttledViewBoxHandler = throttle(viewBoxHandler, 32);
+
+    svg.addEventListener('wheel', viewBoxHandler);
+    svg.addEventListener('mouseenter', viewBoxHandler);
+    svg.addEventListener('mousemove', throttledViewBoxHandler);
+    svg.addEventListener('mouseleave', viewBoxHandler);
+
+    for (const plugin of this.#plugins) {
+      plugin.install(svg);
+    }
+
+    containerDiv.appendChild(svg);
+
+    return {
+      containerDiv,
+      svg,
+    };
   }
 
   /**
@@ -169,6 +199,12 @@ export class GeoJsonMap extends EventEmitter {
    */
   #geoJsonToSVGElement(featureCollection) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
+    const viewBoxAnimate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+    viewBoxAnimate.setAttribute('attributeName', 'viewBox');
+    viewBoxAnimate.setAttribute('dur', '100ms');
+    viewBoxAnimate.setAttribute('fill', 'freeze');
+    svg.appendChild(viewBoxAnimate);
 
     const rect = this.#getBoundingRectFromGeoJSON(featureCollection);
 
@@ -183,7 +219,7 @@ export class GeoJsonMap extends EventEmitter {
     if (featureCollection.type === 'FeatureCollection') {
       for (const feature of featureCollection.features) {
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        const mapFeature = new MapFeature(path, feature.properties)
+        const mapFeature = new MapFeature(path, feature.properties);
         if (typeof this.#initialFill === 'function') {
           path.setAttribute('fill', this.#initialFill(mapFeature));
         }
@@ -204,53 +240,10 @@ export class GeoJsonMap extends EventEmitter {
       }
     }
 
-    
-
-    return svg;
-  }
-
-  /**
-   * @param {SVGSVGElement} svg
-   * @param {MapInteraction} interaction
-   */
-  #attachInteraction(svg, interaction) {
-    /**
-     * @param {Event} event
-     */
-    const bindedViewBoxHandler = (event) => {
-      this.#viewBoxHandler(event);
+    return {
+      svg,
+      viewBoxAnimate,
     };
-    svg.addEventListener('wheel', bindedViewBoxHandler);
-    svg.addEventListener('mouseenter', bindedViewBoxHandler);
-    svg.addEventListener('mouseleave', bindedViewBoxHandler);
-    svg.addEventListener('mousemove', bindedViewBoxHandler);
-  }
-
-  /**
-   * @param {Event} event
-   */
-  #viewBoxHandler(event) {
-    /** @type {ViewBox} */
-    const initialViewBox = this.#svg?.viewBox.baseVal ?? {
-      height: 0,
-      width: 0,
-      x: 0,
-      y: 0,
-    };
-    const mappedViewBox = this.#interactions
-      .reduce((viewBox, interaction) => {
-        return interaction.viewBoxMapper(event, viewBox);
-      }, initialViewBox);
-    if (
-      mappedViewBox.x !== initialViewBox.x
-      || mappedViewBox.y !== initialViewBox.y
-      || mappedViewBox.width !== initialViewBox.width
-      || mappedViewBox.height !== initialViewBox.height
-    ) {
-      requestAnimationFrame(() => {
-        this.#svg?.setAttribute('viewBox', `${mappedViewBox.x} ${mappedViewBox.y} ${mappedViewBox.width} ${mappedViewBox.height}`);
-      });
-    }
   }
 
   /**
@@ -314,7 +307,8 @@ export class GeoJsonMap extends EventEmitter {
             rect.bottom = Math.min(rect.bottom, featureRect.bottom);
             rect.left = Math.min(rect.left, featureRect.left);
             rect.right = Math.max(rect.right, featureRect.right);
-          } else if (feature.geometry.type === 'Polygon') {
+          }
+          else if (feature.geometry.type === 'Polygon') {
             const featureRect = this.#getBoundingRectFromPolygon(feature.geometry);
             rect.top = Math.max(rect.top, featureRect.top);
             rect.bottom = Math.min(rect.bottom, featureRect.bottom);

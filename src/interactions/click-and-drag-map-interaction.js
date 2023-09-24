@@ -6,6 +6,12 @@ import { assertType } from '../tools/typing.js';
 /** @typedef {import('../geojsonmap.js').ViewBox} ViewBox */
 
 export class ClickAndDragMapInteraction extends MapInteraction {
+  #isHoldClick = false;
+  #pageX = 0;
+  #pageY = 0;
+  #originalX = 0;
+  #originalY = 0;
+
   /**
    * @param {Event} event
    * @param {ViewBox} viewBox
@@ -15,17 +21,28 @@ export class ClickAndDragMapInteraction extends MapInteraction {
     event.preventDefault();
 
     if (event instanceof MouseEvent) {
-      const svg = this._svg;
-      assertType(svg, SVGSVGElement);
+      if (event.buttons === 1 && this.#isHoldClick === false) {
+        this.#isHoldClick = true;
+        this.#pageX = event.pageX;
+        this.#pageY = event.pageY;
+        this.#originalX = viewBox.x;
+        this.#originalY = viewBox.y;
+      }
 
-      const isHoldClick = event.buttons === 1;
+      if (event.buttons === 0 && this.#isHoldClick === true) {
+        this.#isHoldClick = false;
+      }
 
-      if (!isHoldClick) {
+      if (this.#isHoldClick === false) {
         return viewBox;
       }
 
-      const movementX = -event.movementX;
-      const movementY = -event.movementY;
+      const svg = this._svg;
+
+      assertType(svg, SVGSVGElement);
+
+      const movementX = event.pageX - this.#pageX;
+      const movementY = event.pageY - this.#pageY;
 
       const svgWidth = svg.clientWidth;
       const svgHeight = svg.clientHeight;
@@ -33,12 +50,15 @@ export class ClickAndDragMapInteraction extends MapInteraction {
       const movementXRatio = movementX / svgWidth;
       const movementYRatio = movementY / svgHeight;
 
-      const xDelta = viewBox.width * movementXRatio;
-      const yDelta = viewBox.height * movementYRatio;
+      const reversedXDelta = viewBox.width * movementXRatio;
+      const reversedYDelta = viewBox.height * movementYRatio;
+
+      const xDelta = -reversedXDelta;
+      const yDelta = -reversedYDelta;
 
       return {
-        x: viewBox.x + xDelta,
-        y: viewBox.y + yDelta,
+        x: this.#originalX + xDelta,
+        y: this.#originalY + yDelta,
         width: viewBox.width,
         height: viewBox.height,
       };
